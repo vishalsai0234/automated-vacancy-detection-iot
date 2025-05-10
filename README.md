@@ -103,4 +103,4 @@ ESP32 display shows live seat availability using MicroPython graphics.
 git clone https://github.com/vishalsai0234/automated-vacancy-detection-iot
 cd flask_server/
 pip install -r requirements.txt
-python app.py
+python flask_app.py
