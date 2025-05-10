@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>People Detection Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fafafa;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .control-panel {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .control-panel h3 {
+            margin-top: 0;
+        }
+
+        input[type="text"], input[type="file"] {
+            padding: 10px;
+            width: calc(100% - 24px);
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button, input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover, input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        #status-message {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .success {
+            color: green;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .image-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: space-around;
+        }
+
+        .image-block {
+            text-align: center;
+        }
+
+        img {
+            max-width: 450px;
+            max-height: 450px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>People Detection Dashboard</h1>
+
+        <!-- ESP32 Trigger Section -->
+        <div class="control-panel">
+            <h3>Request Image from ESP32</h3>
+            <form id="esp32-form">
+                <input type="text" id="esp32-ip" placeholder="ESP32 IP Address (e.g., 192.168.1.123)" required>
+                <button type="button" id="request-image-btn">Request Image</button>
+            </form>
+            <div id="status-message"></div>
+        </div>
+
+        <!-- Manual Upload Section -->
+        <div class="control-panel">
+            <h3>Manual Image Upload</h3>
+            <form method="post" enctype="multipart/form-data">
+                <input type="file" name="image" accept="image/*" required>
+                <input type="submit" value="Upload and Detect">
+            </form>
+        </div>
+
+        <!-- Display Input and Result -->
+        {% if input_url and result_url %}
+        <div class="image-container">
+            <div class="image-block">
+                <h3>Original Image</h3>
+                <img src="{{ input_url }}" alt="Input Image">
+            </div>
+            <div class="image-block">
+                <h3>Detection Result</h3>
+                <img src="{{ result_url }}" alt="Result Image">
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- JavaScript to handle ESP32 request -->
+    <script>
+        document.getElementById('request-image-btn').addEventListener('click', function () {
+            const esp32Ip = document.getElementById('esp32-ip').value.trim();
+            const statusMessage = document.getElementById('status-message');
+
+            if (!esp32Ip) {
+                statusMessage.textContent = "Please enter the ESP32 IP address.";
+                statusMessage.className = "error";
+                return;
+            }
+
+            statusMessage.textContent = "Sending request to ESP32...";
+            statusMessage.className = "";
+
+            fetch('/request_image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'esp32_ip=' + encodeURIComponent(esp32Ip)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    statusMessage.textContent = "Request successful! Waiting for image...";
+                    statusMessage.className = "success";
+                    setTimeout(() => location.reload(), 6000);
+                } else {
+                    statusMessage.textContent = "Error: " + data.message;
+                    statusMessage.className = "error";
+                }
+            })
+            .catch(error => {
+                statusMessage.textContent = "Error: " + error;
+                statusMessage.className = "error";
+            });
+        });
+    </script>
+    <script>
+        setInterval(() => {
+            fetch(window.location.href)
+                .then(res => res.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+    
+                    const newResult = doc.querySelector(".image-container");
+                    if (newResult) {
+                        const current = document.querySelector(".image-container");
+                        if (current) {
+                            current.innerHTML = newResult.innerHTML;
+                        }
+                    }
+                });
+        }, 5000); // Every 5 seconds
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Detection Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            text-align: center;
+            padding: 40px;
+        }
+        h1 {
+            color: #333;
+        }
+        img {
+            max-width: 450px;
+            margin: 20px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }
+        .info {
+            font-size: 20px;
+            color: #007BFF;
+        }
+        a {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+        a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Detection Result</h1>
+    <div class="info">People Count: {{ people_count }}</div>
+    <div>
+        <h3>Uploaded Image</h3>
+        <img src="{{ input_url }}" alt="Input Image">
+    </div>
+    <div>
+        <h3>Detection Output</h3>
+        <img src="{{ result_url }}" alt="Result Image">
+    </div>
+    <a href="/">← Back to Dashboard</a>
+</body>
+</html>
